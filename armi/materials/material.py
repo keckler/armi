@@ -768,7 +768,18 @@ class SimpleSolid(Material):
     refTempK = 300
 
     def __init__(self):
-        Material.__init__(self)
+        # Material.__init__(self)
+
+        self.parent = None
+        self.massFrac = {}
+        self.refDens = 0.0
+        self.theoreticalDensityFrac = 1.0
+        self.cached = {}
+        self._backupCache = None
+
+        # call subclass implementations
+        self.setDefaultMassFracs()
+
         self.refDens = self.density3(Tk=self.refTempK)
 
     def linearExpansionPercent(self, Tk: float = None, Tc: float = None) -> float:
