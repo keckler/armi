@@ -768,18 +768,7 @@ class SimpleSolid(Material):
     refTempK = 300
 
     def __init__(self):
-        # Material.__init__(self)
-
-        self.parent = None
-        self.massFrac = {}
-        self.refDens = 0.0
-        self.theoreticalDensityFrac = 1.0
-        self.cached = {}
-        self._backupCache = None
-
-        # call subclass implementations
-        self.setDefaultMassFracs()
-
+        Material.__init__(self)
         self.refDens = self.density3(Tk=self.refTempK)
 
     def linearExpansionPercent(self, Tk: float = None, Tc: float = None) -> float:
@@ -821,7 +810,20 @@ class SimpleSolid(Material):
         The same method as the parent class, but with the ability to apply a
         non-unity theoretical density.
         """
-        return Material.density(self, Tk=Tk, Tc=Tc) * self.getTD()
+        # return Material.density(self, Tk=Tk, Tc=Tc) * self.getTD()
+
+        Tk = getTk(Tc, Tk)
+        dLL = self.linearExpansionPercent(Tk=Tk)
+        if self.refDens is None:
+            runLog.warning(
+                "{0} has no reference density".format(self),
+                single=True,
+                label="No refD " + self.getName(),
+            )
+            self.refDens = 0.0
+
+        f = (1.0 + dLL / 100.0) ** 2
+        return (self.refDens / f) * self.getTD()
 
 
 class FuelMaterial(Material):
